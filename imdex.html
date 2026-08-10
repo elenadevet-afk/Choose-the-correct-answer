@@ -1,0 +1,293 @@
+<iframe srcdoc='<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Накорми персонажа</title>
+  <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6c29ff;
+      --primary-hover: #4300d6;
+      --text-color: #121212;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Schibsted Grotesk", sans-serif; }
+    body { background: transparent; color: var(--text-color); display: flex; flex-direction: column; height: 100vh; overflow: hidden; position: relative; }
+    
+    header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(5px); padding: 8px 16px; border-bottom: 1px solid #e2dfe8; display: flex; justify-content: space-between; align-items: center; z-index: 20; }
+    h1 { font-size: 1rem; font-weight: 700; color: var(--primary); }
+    
+    .workspace { display: flex; flex: 1; height: calc(100vh - 45px); z-index: 10; }
+    
+    .sidebar { width: 340px; background: #fff; border-right: 1px solid #e2dfe8; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; box-shadow: 4px 0 20px rgba(0,0,0,0.05); z-index: 10; }
+    .sidebar h2 { font-size: 0.9rem; font-weight: 600; color: var(--text-color); border-bottom: 2px solid #f4f1fc; padding-bottom: 4px; }
+    .form-group { display: flex; flex-direction: column; gap: 3px; }
+    label { font-size: 0.75rem; font-weight: 600; color: #625e6e; }
+    input, textarea { padding: 6px 10px; border: 1px solid #c7c3d3; border-radius: 8px; font-size: 0.8rem; outline: none; }
+    input:focus, textarea:focus { border-color: var(--primary); }
+    
+    .food-edit-card { background: #f9f8fc; border: 1px solid #e2dfe8; border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 5px; }
+    .food-edit-row { display: flex; gap: 6px; align-items: center; }
+    .food-edit-row input[type="text"] { flex: 1; }
+    
+    .btn { background: var(--primary); color: #fff; border: none; padding: 8px 14px; border-radius: 2.75rem; font-weight: 600; cursor: pointer; text-align: center; font-size: 0.85rem; }
+    .btn:hover { background: var(--primary-hover); }
+    .btn-secondary { background: #e2dfe8; color: #121212; }
+    .btn-secondary:hover { background: #c7c3d3; }
+    .btn-danger { background: #fae6e6; color: #d83f55; }
+
+    .preview-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 15px; background: transparent; position: relative; perspective: 1000px; }
+    
+    .game-card { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(10px); border-radius: 20px; padding: 20px; box-shadow: 0 10px 30px rgba(18,18,18,0.1); width: 100%; max-width: 650px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px; border: 1px solid rgba(255,255,255,0.5); position: relative; z-index: 2; transition: transform 0.3s; }
+    
+    .character-container { display: flex; align-items: center; gap: 12px; background: #f9f8fc; padding: 10px 16px; border-radius: 14px; width: 100%; border: 1px solid #e2dfe8; transition: all 0.3s; }
+    .character-container.react-happy { background: #e5faf4; border-color: #25a782; transform: scale(1.02); }
+    .character-container.react-angry { background: #fae6e6; border-color: #d83f55; transform: scale(0.98); }
+    
+    .character-avatar { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; background: #ddd; border: 3px solid var(--primary); flex-shrink: 0; transition: transform 0.3s; }
+    .react-happy .character-avatar { transform: rotate(-5deg) scale(1.1); border-color: #25a782; }
+    .react-angry .character-avatar { transform: rotate(5deg); border-color: #d83f55; }
+    
+    .character-dialog { font-size: 1rem; font-weight: 600; text-align: left; flex: 1; line-height: 1.3; }
+    
+    .food-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; width: 100%; max-height: 280px; overflow-y: auto; padding: 4px; }
+    
+    .food-card-btn { background: #fff; border: 2px solid #e2dfe8; border-radius: 14px; padding: 8px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 5px; position: relative; }
+    .food-card-btn:hover { border-color: var(--primary); background: #f9f8fc; transform: translateY(-2px); }
+    .food-card-img { width: 55px; height: 55px; object-fit: cover; border-radius: 8px; background: #f0efe6; }
+    .food-card-title { font-size: 0.85rem; font-weight: 600; color: var(--text-color); }
+    
+    .food-card-btn.correct { background: #e5faf4 !important; border-color: #25a782 !important; animation: bounce 0.5s; }
+    .food-card-btn.wrong { background: #fae6e6 !important; border-color: #d83f55 !important; animation: shake 0.4s; opacity: 0.7; pointer-events: none; }
+
+    .floating-emoji { position: absolute; font-size: 1.8rem; pointer-events: none; animation: floatUp 1s ease-out forwards; z-index: 10; }
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(0) scale(0.5); }
+      100% { opacity: 0; transform: translateY(-70px) scale(1.2); }
+    }
+    @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+    .feedback-box { font-weight: 700; font-size: 0.95rem; min-height: 22px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .confetti { position: absolute; width: 8px; height: 8px; z-index: 1; opacity: 0; pointer-events: none; }
+    @keyframes fall {
+      0% { opacity: 1; transform: translateY(-100vh) rotate(0deg); }
+      100% { opacity: 0; transform: translateY(100vh) rotate(720deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🍲 Накорми персонажа</h1>
+    <button class="btn btn-secondary" id="toggle-mode" style="padding: 4px 10px; font-size: 0.75rem;">🔄 Меню</button>
+  </header>
+
+  <div class="workspace">
+    <div class="sidebar" id="settings-panel">
+      <h2>Настройки персонажа</h2>
+      <div class="form-group">
+        <label>Имя</label>
+        <input type="text" id="input-char-name" value="Кот Даймонд">
+      </div>
+      <div class="form-group">
+        <label>Фото (ссылка)</label>
+        <input type="text" id="input-char-img" value="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=150">
+      </div>
+      <div class="form-group">
+        <label>Задание</label>
+        <textarea id="input-char-dialog" rows="2">Meow! Feed me fresh fish or meat, avoid sweets!</textarea>
+      </div>
+      <div class="form-group">
+        <label style="color: #25a782;">Фразы при успехе</label>
+        <textarea id="input-happy-phrases" rows="2">Purr-fect! 😻, Yummy! 🐟, Delicious! ✨</textarea>
+      </div>
+      <div class="form-group">
+        <label style="color: #d83f55;">Фразы при ошибке</label>
+        <textarea id="input-angry-phrases" rows="2">Yuck! 🤢, No way! 🙀, Gross! 🚫</textarea>
+      </div>
+
+      <h2>Варианты</h2>
+      <div id="food-editor-list" style="display: flex; flex-direction: column; gap: 6px;"></div>
+      <button class="btn btn-secondary" id="add-food-btn">+ Вариант</button>
+      <button class="btn" id="save-btn" style="margin-top: 5px;">Сохранить и играть</button>
+    </div>
+
+    <div class="preview-area" id="game-area">
+      <div class="game-card" id="game-card">
+        <div class="character-container" id="char-container">
+          <img id="char-avatar-view" class="character-avatar" src="" alt="Avatar">
+          <div class="character-dialog" id="char-dialog-view">Загрузка...</div>
+        </div>
+        <div class="food-grid" id="food-options-view"></div>
+        <div class="feedback-box" id="feedback-msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let gameData = {
+      charName: "Кот Даймонд",
+      charImg: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=150",
+      charDialog: "Meow! Feed me fresh fish or meat, avoid sweets!",
+      happyPhrases: "Purr-fect! 😻, Yummy! 🐟, Delicious! ✨",
+      angryPhrases: "Yuck! 🤢, No way! 🙀, Gross! 🚫",
+      items: [
+        { text: "Fresh Fish", img: "https://images.unsplash.com/photo-1534482492321-4cb50328512b?w=150", correct: true },
+        { text: "Juicy Steak", img: "https://images.unsplash.com/photo-1544025162-d76694265947?w=150", correct: true },
+        { text: "Chocolate Cake", img: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=150", correct: false },
+        { text: "Broccoli", img: "https://images.unsplash.com/photo-1459411621453-7b03977f4bfc?w=150", correct: false }
+      ]
+    };
+
+    let isEditing = true;
+    let reactionTimeout;
+    
+    const settingsPanel = document.getElementById("settings-panel");
+    const toggleModeBtn = document.getElementById("toggle-mode");
+    const charContainer = document.getElementById("char-container");
+    const gameArea = document.getElementById("game-area");
+    
+    function init() { renderEditor(); updateGameView(); }
+
+    function renderEditor() {
+      document.getElementById("input-char-name").value = gameData.charName;
+      document.getElementById("input-char-img").value = gameData.charImg;
+      document.getElementById("input-char-dialog").value = gameData.charDialog;
+      document.getElementById("input-happy-phrases").value = gameData.happyPhrases;
+      document.getElementById("input-angry-phrases").value = gameData.angryPhrases;
+
+      const list = document.getElementById("food-editor-list");
+      list.innerHTML = "";
+      gameData.items.forEach((item, index) => {
+        const card = document.createElement("div");
+        card.className = "food-edit-card";
+        card.innerHTML = `
+          <div class="food-edit-row">
+            <input type="checkbox" ${item.correct ? "checked" : ""} onchange="gameData.items[${index}].correct = this.checked">
+            <input type="text" value="${item.text}" placeholder="Название" oninput="gameData.items[${index}].text = this.value">
+            <button class="btn btn-danger" style="padding: 2px 6px;" onclick="removeFood(${index})">✕</button>
+          </div>
+          <input type="text" value="${item.img}" placeholder="Ссылка на картинку" oninput="gameData.items[${index}].img = this.value">
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    window.removeFood = (index) => { gameData.items.splice(index, 1); renderEditor(); };
+    document.getElementById("add-food-btn").addEventListener("click", () => { gameData.items.push({ text: "Новая еда", img: "", correct: false }); renderEditor(); });
+
+    function spawnEmoji(btnElement, isCorrect) {
+      const emoji = document.createElement("div");
+      emoji.className = "floating-emoji";
+      emoji.innerText = isCorrect ? "💖" : "🚫";
+      const rect = btnElement.getBoundingClientRect();
+      const areaRect = gameArea.getBoundingClientRect();
+      emoji.style.left = (rect.left - areaRect.left + rect.width/2 - 12) + "px";
+      emoji.style.top = (rect.top - areaRect.top) + "px";
+      gameArea.appendChild(emoji);
+      setTimeout(() => emoji.remove(), 1000);
+    }
+
+    function triggerConfetti() {
+      const colors = ["#6c29ff", "#25a782", "#ffcf26", "#d83f55"];
+      for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement("div");
+        confetti.className = "confetti";
+        confetti.style.left = Math.random() * 100 + "vw";
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animation = `fall ${Math.random() * 2 + 1}s linear forwards`;
+        gameArea.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 3000);
+      }
+    }
+
+    function updateGameView() {
+      gameData.charName = document.getElementById("input-char-name").value;
+      gameData.charImg = document.getElementById("input-char-img").value;
+      gameData.charDialog = document.getElementById("input-char-dialog").value;
+      gameData.happyPhrases = document.getElementById("input-happy-phrases").value;
+      gameData.angryPhrases = document.getElementById("input-angry-phrases").value;
+
+      document.getElementById("char-avatar-view").src = gameData.charImg;
+      const charDialogView = document.getElementById("char-dialog-view");
+      const feedbackMsg = document.getElementById("feedback-msg");
+      const foodOptionsView = document.getElementById("food-options-view");
+      
+      function resetCharacter() {
+        charContainer.className = "character-container";
+        charDialogView.innerHTML = `<b>${gameData.charName}:</b> "${gameData.charDialog}"`;
+      }
+      resetCharacter();
+      feedbackMsg.innerHTML = "";
+
+      const totalCorrect = gameData.items.filter(i => i.correct).length;
+      let foundCorrect = 0;
+      let gameFinished = false;
+
+      const happyArray = gameData.happyPhrases.split(",").map(s => s.trim());
+      const angryArray = gameData.angryPhrases.split(",").map(s => s.trim());
+
+      const shuffled = [...gameData.items].sort(() => Math.random() - 0.5);
+      foodOptionsView.innerHTML = "";
+      
+      shuffled.forEach(item => {
+        const btn = document.createElement("button");
+        btn.className = "food-card-btn";
+        btn.innerHTML = `
+          <img class="food-card-img" src="${item.img}" alt="${item.text}" onerror="this.src='https://via.placeholder.com/55?text=Food'">
+          <span class="food-card-title">${item.text}</span>
+        `;
+        
+        btn.onclick = () => {
+          if (gameFinished || btn.classList.contains("correct") || btn.classList.contains("wrong")) return;
+
+          clearTimeout(reactionTimeout);
+          spawnEmoji(btn, item.correct);
+
+          if (item.correct) {
+            btn.classList.add("correct");
+            foundCorrect++;
+            charContainer.className = "character-container react-happy";
+            charDialogView.innerHTML = `<b>${gameData.charName}:</b> "${happyArray[Math.floor(Math.random() * happyArray.length)]}"`;
+            
+            if (foundCorrect === totalCorrect) {
+              gameFinished = true;
+              feedbackMsg.style.color = "#25a782";
+              feedbackMsg.innerHTML = "🎉 Отлично! Все нужные ингредиенты собраны!";
+              triggerConfetti();
+              reactionTimeout = setTimeout(resetCharacter, 3000);
+            } else {
+              feedbackMsg.style.color = "#25a782";
+              feedbackMsg.innerHTML = "👍 Верно! Ищем дальше.";
+              reactionTimeout = setTimeout(resetCharacter, 1500);
+            }
+          } else {
+            btn.classList.add("wrong");
+            charContainer.className = "character-container react-angry";
+            charDialogView.innerHTML = `<b>${gameData.charName}:</b> "${angryArray[Math.floor(Math.random() * angryArray.length)]}"`;
+            feedbackMsg.style.color = "#d83f55";
+            feedbackMsg.innerHTML = "❌ Ошибка! Это не подходит.";
+            reactionTimeout = setTimeout(resetCharacter, 1500);
+          }
+        };
+        foodOptionsView.appendChild(btn);
+      });
+    }
+
+    document.getElementById("save-btn").addEventListener("click", () => {
+      isEditing = false;
+      settingsPanel.style.display = "none";
+      updateGameView();
+    });
+
+    toggleModeBtn.addEventListener("click", () => {
+      isEditing = !isEditing;
+      settingsPanel.style.display = isEditing ? "flex" : "none";
+      if (!isEditing) updateGameView();
+    });
+
+    init();
+  </script>
+</body>
+</html>' width="100%" height="600px" style="border:none; border-radius:12px;"></iframe>
