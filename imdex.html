@@ -3,252 +3,474 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Варим зелье! - Сортер</title>
+    <title>Конструктор игры-сортера для Genially</title>
     <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --primary-bg: #2b233d;
+            --panel-bg: #1e1829;
+            --accent-color: #7c5295;
+            --text-color: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: 'Roboto', sans-serif;
-            background: radial-gradient(circle at center, #2e2142, #181124);
-            color: #fff;
-            height: 100vh;
+            background-color: var(--primary-bg);
+            color: var(--text-color);
             display: flex;
-            align-items: center;
-            justify-content: center;
+            height: 100vh;
             overflow: hidden;
         }
-        .game-container {
-            width: 100%;
-            max-width: 800px;
-            height: 500px;
-            background: rgba(30, 24, 41, 0.85);
-            border: 2px solid #5a457a;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+
+        /* ЛЕВАЯ ПАНЕЛЬ: УПРАВЛЕНИЕ */
+        .editor-panel {
+            width: 45%;
+            background-color: var(--panel-bg);
+            border-right: 2px solid #3c304d;
             display: flex;
             flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .editor-panel h2 {
+            font-family: 'Russo One', sans-serif;
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+            color: #d1b3ff;
+        }
+
+        .author {
+            font-size: 0.85rem;
+            color: #a89bc2;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #8c7b9e;
+            margin: 15px 0 10px 0;
+            border-bottom: 1px solid #3c304d;
+            padding-bottom: 4px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+            color: #dcd6e7;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 8px 12px;
+            background-color: #2b233d;
+            border: 1px solid #4a3d5e;
+            color: #fff;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .row .form-group {
+            flex: 1;
+        }
+
+        /* Списки элементов */
+        .item-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+
+        .item-row input {
+            flex: 2;
+        }
+
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background-color: #9363b0;
+        }
+
+        .btn-danger {
+            background-color: #a83232;
+            padding: 8px 10px;
+        }
+
+        .btn-danger:hover {
+            background-color: #c93b3b;
+        }
+
+        .btn-small {
+            font-size: 0.8rem;
+            padding: 6px 10px;
+            margin-top: 5px;
+        }
+
+        /* ПРАВАЯ ПАНЕЛЬ: ПРЕДПРОСМОТР */
+        .preview-panel {
+            width: 55%;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            align-items: center;
+            justify-content: center;
+            background-color: #231c2e;
+        }
+
+        .preview-header {
+            width: 100%;
+            display: flex;
             justify-content: space-between;
-            padding: 25px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .preview-header span {
+            font-size: 0.9rem;
+            color: #bfaee0;
+        }
+
+        .game-frame {
+            width: 100%;
+            height: 450px;
+            background: linear-gradient(135deg, #181322, #322547);
+            border-radius: 12px;
+            border: 2px dashed #52426b;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* Экран игры */
+        #game-title-view {
+            text-align: center;
+            margin: auto;
+        }
+
+        #game-title-view h1 {
+            font-family: 'Russo One', sans-serif;
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+        }
+
+        .play-btn {
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Russo One', sans-serif;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .gameplay-area {
+            display: none;
+            width: 100%;
+            height: 100%;
             position: relative;
         }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        h1 {
-            font-family: 'Russo One', sans-serif;
-            font-size: 1.8rem;
-            color: #d1b3ff;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        }
-        .score {
-            font-size: 1.1rem;
-            background: #412f5c;
-            padding: 6px 14px;
-            border-radius: 20px;
-            border: 1px solid #7c5295;
-        }
-        .play-area {
+
+        .target-zones {
             display: flex;
             justify-content: space-around;
-            align-items: center;
-            flex: 1;
-            margin: 20px 0;
+            width: 100%;
+            margin-top: 10px;
         }
+
         .zone {
-            width: 220px;
-            height: 180px;
-            background: rgba(255,255,255,0.04);
-            border: 3px dashed #7c5295;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-        }
-        .zone.drag-over {
-            background: rgba(124, 82, 149, 0.25);
-            border-color: #bfaee0;
-            transform: scale(1.03);
-        }
-        .zone h3 {
-            font-family: 'Russo One', sans-serif;
-            font-size: 1rem;
-            margin-bottom: 10px;
-            color: #e2d9ed;
+            background: rgba(255,255,255,0.08);
+            border: 2px dashed rgba(255,255,255,0.3);
+            border-radius: 10px;
+            padding: 15px;
+            min-width: 140px;
             text-align: center;
         }
-        .items-pool {
+
+        .zone h4 {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: #e2d9ed;
+        }
+
+        .floating-items {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
             display: flex;
             justify-content: center;
-            gap: 20px;
-            min-height: 70px;
-            background: rgba(0,0,0,0.2);
-            padding: 10px;
-            border-radius: 10px;
+            gap: 15px;
+            flex-wrap: wrap;
         }
+
         .draggable-item {
-            width: 60px;
-            height: 60px;
+            width: 55px;
+            height: 55px;
             background: #fff;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: grab;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            overflow: hidden;
             border: 2px solid #bfaee0;
-            transition: transform 0.2s;
-            user-select: none;
         }
-        .draggable-item:active { cursor: grabbing; }
-        .draggable-item:hover { transform: scale(1.1); }
+
         .draggable-item img {
-            width: 75%;
-            height: 75%;
-            object-fit: contain;
-            pointer-events: none;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
-        #win-screen {
-            position: absolute;
-            inset: 0;
-            background: rgba(24, 17, 36, 0.95);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border-radius: 16px;
-            z-index: 10;
+
+        /* Кнопка генерации кода для Genially */
+        .export-box {
+            margin-top: 15px;
+            width: 100%;
+            background: #191421;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #3c304d;
         }
-        #win-screen h2 {
-            font-family: 'Russo One', sans-serif;
-            font-size: 2.5rem;
+
+        textarea.code-output {
+            width: 100%;
+            height: 50px;
+            background: #110d17;
+            border: 1px solid #332842;
             color: #76ff76;
-            margin-bottom: 15px;
+            font-family: monospace;
+            font-size: 0.75rem;
+            padding: 5px;
+            border-radius: 4px;
+            resize: none;
+            margin-top: 5px;
         }
-        .btn {
-            background: #7c5295;
-            color: #fff;
-            border: none;
-            padding: 10px 25px;
-            font-size: 1.1rem;
-            font-family: 'Russo One', sans-serif;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .btn:hover { background: #9363b0; }
     </style>
 </head>
 <body>
 
-    <div class="game-container">
-        <div class="header">
-            <h1>Варим зелье!</h1>
-            <div class="score">Собрано: <span id="score">0</span> / 4</div>
-        </div>
+    <!-- ЛЕВАЯ ПАНЕЛЬ НАСТРОЙКИ -->
+    <div class="editor-panel">
+        <h2>MAGIC & MONSTERS</h2>
+        <div class="author">Конструктор сортер-игр v1.0</div>
 
-        <div class="play-area">
-            <!-- Зона 1 -->
-            <div class="zone" id="zone-1" data-category="alchemy" ondragover="allowDrop(event)" ondragleave="removeHighlight(event)" ondrop="dropItem(event)">
-                <h3>🪄 Котел стихий</h3>
-            </div>
-            <!-- Зона 2 -->
-            <div class="zone" id="zone-2" data-category="nature" ondragover="allowDrop(event)" ondragleave="removeHighlight(event)" ondrop="dropItem(event)">
-                <h3>🍄 Лесная поляна</h3>
-            </div>
+        <div class="section-title">Начальный экран</div>
+        <div class="form-group">
+            <label>Заголовок игры</label>
+            <input type="text" id="input-title" value="Варим зелье!" oninput="updatePreview()">
         </div>
-
-        <div class="items-pool" id="pool">
-            <!-- Элементы с указанием правильной категории (cat) -->
-            <div class="draggable-item" draggable="true" id="item-1" data-category="alchemy" ondragstart="drag(event)">
-                <img src="https://cdn-icons-png.flaticon.com/512/3176/3176363.png" alt="Кристалл">
+        <div class="row">
+            <div class="form-group">
+                <label>Цвет текста</label>
+                <input type="text" id="input-title-color" value="#ffffff" oninput="updatePreview()">
             </div>
-            <div class="draggable-item" draggable="true" id="item-2" data-category="nature" ondragstart="drag(event)">
-                <img src="https://cdn-icons-png.flaticon.com/512/2917/2917995.png" alt="Гриб">
-            </div>
-            <div class="draggable-item" draggable="true" id="item-3" data-category="alchemy" ondragstart="drag(event)">
-                <img src="https://cdn-icons-png.flaticon.com/512/2933/2933116.png" alt="Зелье">
-            </div>
-            <div class="draggable-item" draggable="true" id="item-4" data-category="nature" ondragstart="drag(event)">
-                <img src="https://cdn-icons-png.flaticon.com/512/1049/1049314.png" alt="Цветок">
+            <div class="form-group">
+                <label>Шрифт заголовка</label>
+                <select id="input-font" onchange="updatePreview()">
+                    <option value="'Russo One', sans-serif">Russo One</option>
+                    <option value="'Roboto', sans-serif">Roboto</option>
+                </select>
             </div>
         </div>
 
-        <!-- Экран победы -->
-        <div id="win-screen">
-            <h2>🎉 Зелье готово!</h2>
-            <button class="btn" onclick="resetGame()">Играть снова</button>
+        <div class="form-group">
+            <label>Текст кнопки старт</label>
+            <input type="text" id="input-btn-text" value="ИГРАТЬ" oninput="updatePreview()">
+        </div>
+        <div class="row">
+            <div class="form-group">
+                <label>Цвет кнопки</label>
+                <input type="text" id="input-btn-bg" value="#7c5295" oninput="updatePreview()">
+            </div>
+            <div class="form-group">
+                <label>Цвет текста кнопки</label>
+                <input type="text" id="input-btn-color" value="#ffffff" oninput="updatePreview()">
+            </div>
+        </div>
+
+        <div class="section-title">Категории (Куда сортируем)</div>
+        <div id="categories-container">
+            <div class="item-row">
+                <input type="text" class="cat-input" value="Котел стихий" oninput="updatePreview()">
+                <button class="btn btn-danger" onclick="this.parentElement.remove(); updatePreview()">✕</button>
+            </div>
+            <div class="item-row">
+                <input type="text" class="cat-input" value="Книга заклинаний" oninput="updatePreview()">
+                <button class="btn btn-danger" onclick="this.parentElement.remove(); updatePreview()">✕</button>
+            </div>
+        </div>
+        <button class="btn btn-small" onclick="addCategory()">+ Добавить категорию</button>
+
+        <div class="section-title" style="margin-top:20px;">Элементы для сортировки (Картинки)</div>
+        <div id="items-container">
+            <div class="item-row">
+                <input type="text" class="item-name" value="Кристалл" placeholder="Имя" oninput="updatePreview()">
+                <input type="text" class="item-img" value="https://cdn-icons-png.flaticon.com/512/3176/3176363.png" placeholder="URL картинки" oninput="updatePreview()">
+                <button class="btn btn-danger" onclick="this.parentElement.remove(); updatePreview()">✕</button>
+            </div>
+            <div class="item-row">
+                <input type="text" class="item-name" value="Гриб" placeholder="Имя" oninput="updatePreview()">
+                <input type="text" class="item-img" value="https://cdn-icons-png.flaticon.com/512/2917/2917995.png" placeholder="URL картинки" oninput="updatePreview()">
+                <button class="btn btn-danger" onclick="this.parentElement.remove(); updatePreview()">✕</button>
+            </div>
+        </div>
+        <button class="btn btn-small" onclick="addItem()">+ Добавить объект</button>
+    </div>
+
+    <!-- ПРАВАЯ ПАНЕЛЬ: ПРЕДПРОСМОТР И КОД -->
+    <div class="preview-panel">
+        <div class="preview-header">
+            <span>Предпросмотр в реальном времени</span>
+            <button class="btn btn-small" onclick="startGamePreview()">▶ Запустить игру</button>
+        </div>
+
+        <div class="game-frame" id="gameFrame">
+            <!-- Экран старта -->
+            <div id="game-title-view">
+                <h1 id="view-title">Варим зелье!</h1>
+                <button class="play-btn" id="view-play-btn" onclick="startGamePreview()">ИГРАТЬ</button>
+            </div>
+
+            <!-- Игровой процесс -->
+            <div class="gameplay-area" id="gameplay-view">
+                <div class="target-zones" id="view-zones">
+                    <!-- Динамически заполняются -->
+                </div>
+                <div class="floating-items" id="view-items">
+                    <!-- Динамически заполняются -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Блок экспорта для Genially -->
+        <div class="export-box">
+            <label>Код для вставки в Genially (через элемент "Вставить iframe"):</label>
+            <textarea class="code-output" id="iframeCode" readonly></textarea>
         </div>
     </div>
 
     <script>
-        let score = 0;
-        const totalItems = 4;
+        function updatePreview() {
+            // Обновление стилей и текстов стартового экрана
+            const title = document.getElementById('input-title').value;
+            const titleColor = document.getElementById('input-title-color').value;
+            const font = document.getElementById('input-font').value;
+            const btnText = document.getElementById('input-btn-text').value;
+            const btnBg = document.getElementById('input-btn-bg').value;
+            const btnColor = document.getElementById('input-btn-color').value;
 
-        function drag(event) {
-            event.dataTransfer.setData("text", event.target.id);
+            const vTitle = document.getElementById('view-title');
+            vTitle.innerText = title;
+            vTitle.style.color = titleColor;
+            vTitle.style.fontFamily = font;
+
+            const vBtn = document.getElementById('view-play-btn');
+            vBtn.innerText = btnText;
+            vBtn.style.backgroundColor = btnBg;
+            vBtn.style.color = btnColor;
+
+            // Обновление зон и элементов для игры
+            renderGameElements();
+            generateIframeCode();
         }
 
-        function allowDrop(event) {
-            event.preventDefault();
-            event.currentTarget.classList.add('drag-over');
+        function addCategory() {
+            const container = document.getElementById('categories-container');
+            const div = document.createElement('div');
+            div.className = 'item-row';
+            div.innerHTML = `<input type="text" class="cat-input" value="Новая категория" oninput="updatePreview()"><button class="btn btn-danger" onclick="this.parentElement.remove(); updatePreview()">✕</button>`;
+            container.appendChild(div);
+            updatePreview();
         }
 
-        function removeHighlight(event) {
-            event.currentTarget.classList.remove('drag-over');
+        function addItem() {
+            const container = document.getElementById('items-container');
+            const div = document.createElement('div');
+            div.className = 'item-row';
+            div.innerHTML = `
+                <input type="text" class="item-name" value="Объект" placeholder="Имя" oninput="updatePreview()">
+                <input type="text" class="item-img" value="https://cdn-icons-png.flaticon.com/512/616/616490.png" placeholder="URL картинки" oninput="updatePreview()">
+                <button class="btn btn-danger" onclick="this.parentElement.remove(); updatePreview()">✕</button>`;
+            container.appendChild(div);
+            updatePreview();
         }
 
-        function dropItem(event) {
-            event.preventDefault();
-            const zone = event.currentTarget;
-            zone.classList.remove('drag-over');
-
-            const itemId = event.dataTransfer.getData("text");
-            const item = document.getElementById(itemId);
-            
-            if (!item) return;
-
-            // Проверка соответствия категории
-            const itemCat = item.getAttribute('data-category');
-            const zoneCat = zone.getAttribute('data-category');
-
-            if (itemCat === zoneCat) {
-                zone.appendChild(item);
-                item.setAttribute('draggable', 'false');
-                item.style.cursor = 'default';
-                item.style.transform = 'none';
-                score++;
-                document.getElementById('score').innerText = score;
-
-                if (score === totalItems) {
-                    setTimeout(() => {
-                        document.getElementById('win-screen').style.display = 'flex';
-                    }, 400);
-                }
-            } else {
-                // Анимация ошибки (легкое покачивание)
-                item.style.transform = 'translateX(8px)';
-                setTimeout(() => item.style.transform = 'none', 150);
-            }
+        function startGamePreview() {
+            document.getElementById('game-title-view').style.display = 'none';
+            document.getElementById('gameplay-view').style.display = 'block';
+            renderGameElements();
         }
 
-        function resetGame() {
-            score = 0;
-            document.getElementById('score').innerText = score;
-            document.getElementById('win-screen').style.display = 'none';
-            
-            const pool = document.getElementById('pool');
-            const items = document.querySelectorAll('.draggable-item');
-            
-            items.forEach(item => {
-                item.setAttribute('draggable', 'true');
-                item.style.cursor = 'grab';
-                pool.appendChild(item);
+        function renderGameElements() {
+            // Отрисовка зон
+            const zonesContainer = document.getElementById('view-zones');
+            zonesContainer.innerHTML = '';
+            const catInputs = document.querySelectorAll('.cat-input');
+            catInputs.forEach(input => {
+                const zone = document.createElement('div');
+                zone.className = 'zone';
+                zone.innerHTML = `<h4>${input.value}</h4>`;
+                zonesContainer.appendChild(zone);
+            });
+
+            // Отрисовка элементов
+            const itemsContainer = document.getElementById('view-items');
+            itemsContainer.innerHTML = '';
+            const itemRows = document.querySelectorAll('#items-container .item-row');
+            itemRows.forEach(row => {
+                const name = row.querySelector('.item-name').value;
+                const img = row.querySelector('.item-img').value;
+                const item = document.createElement('div');
+                item.className = 'draggable-item';
+                item.title = name;
+                item.innerHTML = `<img src="${img}" alt="${name}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2748/2748558.png'">`;
+                itemsContainer.appendChild(item);
             });
         }
+
+        function generateIframeCode() {
+            // Генерация самодостаточного HTML-кода, который можно зашить в iframe
+            const htmlContent = `<!DOCTYPE html><html><head><style>body{background:#181322;color:#fff;font-family:sans-serif;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;}</style></head><body><h2>Игра: ${document.getElementById('input-title').value}</h2></body></html>`;
+            const encoded = 'data:text/html;charset=utf-8,' + encodeURIComponent(htmlContent);
+            document.getElementById('iframeCode').value = `<iframe src="${encoded}" width="100%" height="500px" style="border:none;"></iframe>`;
+        }
+
+        // Первичный запуск
+        updatePreview();
     </script>
 </body>
 </html>
